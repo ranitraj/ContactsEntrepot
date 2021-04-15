@@ -10,14 +10,15 @@ public interface IMainActivityContract {
     // View
     interface View {
         void initializeViews();
-        void setupLottieAnimationView();
+        void setupLottieAnimation(String animationName);
         void setupHandlerThreads();
+        void destroyHandlerThreads();
         void onImportContactButtonClicked();
         void onExportContactButtonClicked();
         void onShareButtonClicked();
         void setupRecyclerView();
         void changeViewVisibility();
-
+        void displaySnackBar(String message);
     }
 
     // View-Model
