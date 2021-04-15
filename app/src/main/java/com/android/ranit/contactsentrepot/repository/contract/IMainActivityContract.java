@@ -9,6 +9,14 @@ public interface IMainActivityContract {
 
     // View
     interface View {
+        void initializeViews();
+        void setupLottieAnimationView();
+        void setupHandlerThreads();
+        void onImportContactButtonClicked();
+        void onExportContactButtonClicked();
+        void onShareButtonClicked();
+        void setupRecyclerView();
+        void changeViewVisibility();
 
     }
 
