@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
 
     private final String NO_DATA_ANIMATION = "no_data.json";
     private final String LOADING_ANIMATION = "loading.json";
+    private final String ERROR_ANIMATION = "error.json";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
