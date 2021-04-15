@@ -36,6 +36,9 @@ dependencies {
 
     // POI.jar auto dependency
     implementation files('libs/poi-3.7.jar')
+
+    // Lottie
+    implementation 'com.airbnb.android:lottie:3.4.1'
     
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'

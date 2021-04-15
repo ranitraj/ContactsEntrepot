@@ -1,18 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".view.MainActivity">
+<layout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".view.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/import_contact_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            android:text="@string/import_contacts"
+            android:textStyle="bold"
+            android:padding="@dimen/dp_8"
+            android:textSize="@dimen/sp_16"
+
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/export_contact_button"
+            app:icon="@drawable/ic_import_contact"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/export_contact_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="@string/export_contacts"
+            android:textStyle="bold"
+            android:padding="@dimen/dp_8"
+            android:textSize="@dimen/sp_16"
+
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/import_contact_button"
+            app:layout_constraintBottom_toTopOf="@id/display_contacts_recycler_view"
+            app:icon="@drawable/ic_article"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/display_contacts_recycler_view"
+            android:layout_width="@dimen/dp_0"
+            android:layout_height="@dimen/dp_0"
+            app:layout_constraintHeight_percent="0.7"
+
+            android:visibility="invisible"
+
+            android:layout_margin="@dimen/dp_8"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/export_contact_button"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/lottie_animation_view"
+            android:layout_width="@dimen/dp_0"
+            android:layout_height="@dimen/dp_0"
+
+            app:lottie_loop="true"
+            app:lottie_autoPlay="true"
+
+            app:layout_constraintWidth_percent="0.3"
+            app:layout_constraintHeight_percent="0.15"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/display_contacts_recycler_view"
+            app:layout_constraintBottom_toBottomOf="@id/display_contacts_recycler_view"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/share_excel_floating_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/dp_16"
+            android:contentDescription="@string/app_name"
+
+            android:src="@drawable/ic_share"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
