@@ -3,6 +3,7 @@ package com.android.ranit.contactsentrepot.view;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import com.airbnb.lottie.LottieAnimationView;
 import com.android.ranit.contactsentrepot.R;
 import com.android.ranit.contactsentrepot.databinding.ActivityMainBinding;
 import com.android.ranit.contactsentrepot.repository.contract.IMainActivityContract;
+import com.android.ranit.contactsentrepot.viewModel.MainActivityViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
@@ -22,6 +24,7 @@ import com.google.android.material.snackbar.Snackbar;
  */
 public class MainActivity extends AppCompatActivity implements IMainActivityContract.View {
     private ActivityMainBinding mBinding;
+    private MainActivityViewModel mViewModel;
 
     private Button importContactsButton;
     private Button exportContactsButton;
@@ -37,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        mViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
 
         initializeViews();
     }
@@ -45,6 +49,9 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     protected void onResume() {
         super.onResume();
 
+        importContactsButton.setOnClickListener(view -> onImportContactButtonClicked());
+        exportContactsButton.setOnClickListener(view -> onExportContactButtonClicked());
+        shareButton.setOnClickListener(view -> onShareButtonClicked());
     }
 
     @Override
@@ -92,29 +99,32 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     @Override
     public void onImportContactButtonClicked() {
         displaySnackBar("Reading data from Excel...");
-
-
+        mViewModel.initiateImport();
     }
 
     @Override
     public void onExportContactButtonClicked() {
         displaySnackBar("Exporting data into Excel...");
-
+        mViewModel.initiateExport();
     }
 
     @Override
     public void onShareButtonClicked() {
-
+        mViewModel.initiateSharing();
     }
 
     @Override
     public void setupRecyclerView() {
+        changeAnimationViewVisibility();
+
 
     }
 
     @Override
-    public void changeViewVisibility() {
-
+    public void changeAnimationViewVisibility() {
+        if (animationView.getVisibility() == View.VISIBLE) {
+            animationView.setVisibility(View.GONE);
+        }
     }
 
     @Override

@@ -17,12 +17,14 @@ public interface IMainActivityContract {
         void onExportContactButtonClicked();
         void onShareButtonClicked();
         void setupRecyclerView();
-        void changeViewVisibility();
+        void changeAnimationViewVisibility();
         void displaySnackBar(String message);
     }
 
     // View-Model
     interface ViewModel {
-
+        void initiateImport();
+        void initiateExport();
+        void initiateSharing();
     }
 }
