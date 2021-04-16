@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Contacts Entrepot</string>
     <string name="import_contacts">Import Contacts</string>
-    <string name="export_contacts">Export Contacts</string>
+    <string name="export_contacts">Export Into Excel</string>
+    <string name="read_excel_data">Read From Excel</string>
 </resources>

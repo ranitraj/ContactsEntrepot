@@ -27,7 +27,8 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     private MainActivityViewModel mViewModel;
 
     private Button importContactsButton;
-    private Button exportContactsButton;
+    private Button exportExcelButton;
+    private Button readExcelButton;
     private FloatingActionButton shareButton;
     private LottieAnimationView animationView;
     private RecyclerView contactsRecyclerView;
@@ -51,7 +52,8 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
         super.onResume();
 
         importContactsButton.setOnClickListener(view -> onImportContactButtonClicked());
-        exportContactsButton.setOnClickListener(view -> onExportContactButtonClicked());
+        exportExcelButton.setOnClickListener(view -> onExportIntoExcelButtonClicked());
+        readExcelButton.setOnClickListener(view -> onReadFromExcelButtonClicked());
         shareButton.setOnClickListener(view -> onShareButtonClicked());
     }
 
@@ -69,7 +71,8 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     @Override
     public void initializeViews() {
         importContactsButton = mBinding.importContactButton;
-        exportContactsButton = mBinding.exportContactButton;
+        exportExcelButton = mBinding.exportContactButton;
+        readExcelButton = mBinding.readExcelDataButton;
         shareButton = mBinding.shareExcelFloatingButton;
         animationView = mBinding.lottieAnimationView;
         contactsRecyclerView = mBinding.displayContactsRecyclerView;
@@ -99,14 +102,20 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
 
     @Override
     public void onImportContactButtonClicked() {
-        displaySnackBar("Reading data from Excel...");
+        displaySnackBar("Fetching Mobile contacts...");
         mViewModel.initiateImport();
     }
 
     @Override
-    public void onExportContactButtonClicked() {
+    public void onExportIntoExcelButtonClicked() {
         displaySnackBar("Exporting data into Excel...");
         mViewModel.initiateExport();
+    }
+
+    @Override
+    public void onReadFromExcelButtonClicked() {
+        displaySnackBar("Reading data from excel...");
+        mViewModel.initiateRead();
     }
 
     @Override

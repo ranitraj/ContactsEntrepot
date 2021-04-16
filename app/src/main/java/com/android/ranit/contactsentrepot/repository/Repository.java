@@ -45,6 +45,14 @@ public class Repository implements IRepositoryContract {
     }
 
     /**
+     * Method: Retrieves all data from Contacts Application via Content Provider
+     */
+    public void initiateImport() {
+        Log.e(TAG, "initiateImport: ");
+
+    }
+
+    /**
      * Method: Read Data from Excel Sheet
      */
     public void readDataFromExcel() {

@@ -23,13 +23,19 @@ public class MainActivityViewModel extends AndroidViewModel
     @Override
     public void initiateImport() {
         Log.e(TAG, "initiateImport: ");
-        mRepository.readDataFromExcel();
+        mRepository.initiateImport();
     }
 
     @Override
     public void initiateExport() {
         Log.e(TAG, "initiateExport: ");
         mRepository.generateExcel();
+    }
+
+    @Override
+    public void initiateRead() {
+        Log.e(TAG, "initiateRead: ");
+        mRepository.readDataFromExcel();
     }
 
     @Override

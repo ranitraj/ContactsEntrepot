@@ -31,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
-            android:text="@string/export_contacts"
+            android:text=  "@string/export_contacts"
             android:textStyle="bold"
             android:padding="@dimen/dp_8"
             android:textSize="@dimen/sp_16"
@@ -39,15 +39,32 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/import_contact_button"
-            app:layout_constraintBottom_toTopOf="@id/display_contacts_recycler_view"
+            app:layout_constraintBottom_toTopOf="@id/read_excel_data_button"
             app:icon="@drawable/ic_article"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/read_excel_data_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="@string/read_excel_data"
+            android:textStyle="bold"
+            android:padding="@dimen/dp_8"
+            android:textSize="@dimen/sp_16"
+
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/export_contact_button"
+            app:layout_constraintBottom_toTopOf="@id/display_contacts_recycler_view"
+            app:icon="@drawable/ic_read"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/display_contacts_recycler_view"
             android:layout_width="@dimen/dp_0"
             android:layout_height="@dimen/dp_0"
-            app:layout_constraintHeight_percent="0.7"
+            app:layout_constraintHeight_percent="0.6"
 
             android:visibility="invisible"
 

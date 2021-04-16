@@ -14,7 +14,8 @@ public interface IMainActivityContract {
         void setupHandlerThreads();
         void destroyHandlerThreads();
         void onImportContactButtonClicked();
-        void onExportContactButtonClicked();
+        void onExportIntoExcelButtonClicked();
+        void onReadFromExcelButtonClicked();
         void onShareButtonClicked();
         void setupRecyclerView();
         void changeAnimationViewVisibility();
@@ -25,6 +26,7 @@ public interface IMainActivityContract {
     interface ViewModel {
         void initiateImport();
         void initiateExport();
+        void initiateRead();
         void initiateSharing();
     }
 }
