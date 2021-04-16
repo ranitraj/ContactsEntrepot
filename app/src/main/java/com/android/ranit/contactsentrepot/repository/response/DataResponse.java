@@ -1,11 +1,9 @@
 package com.android.ranit.contactsentrepot.repository.response;
 
-import org.apache.poi.hssf.record.formula.functions.T;
-
 /**
  * Created by: Ranit Raj Ganguly on 16/04/21.
  */
-public class DataResponse {
+public class DataResponse<T> {
     @StateDefinition.State
     private int state;
 

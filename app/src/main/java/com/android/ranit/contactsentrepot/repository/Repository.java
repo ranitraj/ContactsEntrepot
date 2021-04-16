@@ -2,8 +2,15 @@ package com.android.ranit.contactsentrepot.repository;
 
 import android.util.Log;
 
+import androidx.lifecycle.MutableLiveData;
+
 import com.android.ranit.contactsentrepot.common.ExcelUtils;
 import com.android.ranit.contactsentrepot.repository.contract.IRepositoryContract;
+import com.android.ranit.contactsentrepot.repository.data.ContactResponse;
+import com.android.ranit.contactsentrepot.repository.response.DataResponse;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Singleton Class to fetch data
@@ -15,6 +22,10 @@ public class Repository implements IRepositoryContract {
     private static Repository INSTANCE = null;
 
     private ExcelUtils mExcelUtils;
+
+    private List<ContactResponse> contactResponseList;
+
+    private MutableLiveData<DataResponse<ContactResponse>> contactsMLD;
 
     /**
      * Returns a Singleton Instance of this class
@@ -36,7 +47,9 @@ public class Repository implements IRepositoryContract {
 
     @Override
     public void initialize() {
+        contactResponseList = new ArrayList<>();
 
+        contactsMLD = new MutableLiveData<>();
     }
 
     @Override

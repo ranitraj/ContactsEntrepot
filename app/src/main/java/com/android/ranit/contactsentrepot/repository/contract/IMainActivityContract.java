@@ -17,9 +17,13 @@ public interface IMainActivityContract {
         void onExportIntoExcelButtonClicked();
         void onReadFromExcelButtonClicked();
         void onShareButtonClicked();
+        void switchVisibility(android.view.View view, int visibility);
+        void enableUIComponents();
+        void disableUIComponents();
         void setupRecyclerView();
-        void changeAnimationViewVisibility();
         void displaySnackBar(String message);
+        boolean checkPermissionsAtRuntime();
+        void requestPermissions();
     }
 
     // View-Model
