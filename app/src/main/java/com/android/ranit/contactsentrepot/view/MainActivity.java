@@ -27,6 +27,7 @@ import com.airbnb.lottie.LottieAnimationView;
 import com.android.ranit.contactsentrepot.R;
 import com.android.ranit.contactsentrepot.common.Constants;
 import com.android.ranit.contactsentrepot.data.ContactResponse;
+import com.android.ranit.contactsentrepot.data.response.BooleanResponse;
 import com.android.ranit.contactsentrepot.data.response.DataResponse;
 import com.android.ranit.contactsentrepot.data.response.StateDefinition;
 import com.android.ranit.contactsentrepot.databinding.ActivityMainBinding;
@@ -38,7 +39,6 @@ import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -52,6 +52,8 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
 
     private HandlerThread importContactsHandlerThread;
     private Handler contactsHandler;
+    private HandlerThread generateExcelHandlerThread;
+    private Handler excelHandler;
 
     private Button importContactsButton;
     private Button exportExcelButton;
@@ -105,6 +107,26 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     };
 
     /**
+     * Observer for isExcelGeneratedLiveData
+     */
+    private final Observer<BooleanResponse> excelGenerationObserver = booleanResponse -> {
+        Log.e(TAG, "excelGenerationObserver onChanged()");
+
+        if (booleanResponse.getState() == StateDefinition.State.SUCCESS) {
+            setupLottieAnimation(NO_DATA_ANIMATION);
+            displaySnackBar(Constants.EXCEL_FILE_NAME+" generated Successfully");
+        } else if (booleanResponse.getState() == StateDefinition.State.ERROR) {
+            setupLottieAnimation(ERROR_ANIMATION);
+
+            String errorMessage = (booleanResponse.getErrorData().getErrorStatus()
+                    + booleanResponse.getErrorData().getErrorMessage());
+            displaySnackBar(errorMessage);
+        } else {
+            setupLottieAnimation(LOADING_ANIMATION);
+        }
+    };
+
+    /**
      * Importing contacts Runnable to parse data in a Background HandlerThread
      */
     private final Runnable importContactsRunnable = new Runnable() {
@@ -112,6 +134,17 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
         public void run() {
             Log.e(TAG, "importContactsRunnable run: ");
             mViewModel.initiateImport();
+        }
+    };
+
+    /**
+     * Generate Excel Runnable
+     */
+    private final Runnable generateExcelRunnable = new Runnable() {
+        @Override
+        public void run() {
+            Log.e(TAG, "generateExcelRunnable run: ");
+            mViewModel.initiateExport(contactsList);
         }
     };
 
@@ -124,6 +157,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
 
         mViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
         mViewModel.getContactsFromCPLiveData().observe(this, importContactsFromCPObserver);
+        mViewModel.isExcelGeneratedLiveData().observe(this, excelGenerationObserver);
 
         initializeViews();
         setupHandlerThreads();
@@ -155,9 +189,10 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     protected void onDestroy() {
         super.onDestroy();
 
-        importContactsHandlerThread.quitSafely();
+        destroyHandlerThreads();
 
         mViewModel.getContactsFromCPLiveData().removeObservers(this);
+        mViewModel.isExcelGeneratedLiveData().removeObservers(this);
     }
 
     @Override
@@ -176,7 +211,6 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
 
     @Override
     public void setupLottieAnimation(String animationName) {
-        Log.e(TAG, "setupLottieAnimation: ");
         if (animationView.isAnimating()) {
             animationView.cancelAnimation();
         }
@@ -193,11 +227,19 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
                 Process.THREAD_PRIORITY_BACKGROUND);
         importContactsHandlerThread.start();
         contactsHandler = new Handler(importContactsHandlerThread.getLooper());
+
+        // Generate Excel handler thread
+        generateExcelHandlerThread = new HandlerThread("GenerateExcelThread",
+                Process.THREAD_PRIORITY_BACKGROUND);
+        generateExcelHandlerThread.start();
+        excelHandler = new Handler(generateExcelHandlerThread.getLooper());
     }
 
     @Override
     public void destroyHandlerThreads() {
         Log.e(TAG, "destroyHandlerThreads: ");
+        importContactsHandlerThread.quitSafely();
+        generateExcelHandlerThread.quitSafely();
     }
 
     @Override
@@ -209,8 +251,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     @Override
     public void onExportIntoExcelButtonClicked() {
         Log.e(TAG, "onExportIntoExcelButtonClicked: ");
-        displaySnackBar("Exporting data into Excel...");
-        mViewModel.initiateExport();
+        excelHandler.post(generateExcelRunnable);
     }
 
     @Override

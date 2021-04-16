@@ -1,5 +1,9 @@
 package com.android.ranit.contactsentrepot.contract;
 
+import com.android.ranit.contactsentrepot.data.ContactResponse;
+
+import java.util.List;
+
 /**
  * Contract to be implemented by MainActivity (View) and MainActivityViewModel (ViewModel)
  *
@@ -29,7 +33,7 @@ public interface IMainActivityContract {
     // View-Model
     interface ViewModel {
         void initiateImport();
-        void initiateExport();
+        void initiateExport(List<ContactResponse> dataList);
         void initiateRead();
         void initiateSharing();
     }

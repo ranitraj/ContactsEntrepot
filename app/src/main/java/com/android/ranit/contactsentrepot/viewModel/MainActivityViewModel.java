@@ -12,8 +12,11 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.android.ranit.contactsentrepot.common.Constants;
+import com.android.ranit.contactsentrepot.common.ExcelUtils;
 import com.android.ranit.contactsentrepot.contract.IMainActivityContract;
 import com.android.ranit.contactsentrepot.data.ContactResponse;
+import com.android.ranit.contactsentrepot.data.response.BooleanResponse;
 import com.android.ranit.contactsentrepot.data.response.DataResponse;
 import com.android.ranit.contactsentrepot.data.response.ErrorData;
 import com.android.ranit.contactsentrepot.data.response.StateDefinition;
@@ -29,15 +32,16 @@ public class MainActivityViewModel extends AndroidViewModel
     private List<ContactResponse.PhoneNumber> phoneNumberList;
 
     private MutableLiveData<DataResponse<ContactResponse>> contactsMLD;
+    private MutableLiveData<BooleanResponse> generateExcelMLD;
 
     // Constructor
     public MainActivityViewModel(@NonNull Application application) {
         super(application);
 
         contactResponseList = new ArrayList<>();
-        phoneNumberList = new ArrayList<>();
 
         contactsMLD = new MutableLiveData<>();
+        generateExcelMLD = new MutableLiveData<>();
     }
 
     @Override
@@ -51,7 +55,7 @@ public class MainActivityViewModel extends AndroidViewModel
 
         queryContactsContentProvider();
 
-        Log.e(TAG, "initiateImport SIZE: "+contactResponseList.size() );
+        Log.e(TAG, "initiateImport SIZE: " + contactResponseList.size());
 
         if (contactResponseList != null && contactResponseList.size() > 0) {
             response = new DataResponse(StateDefinition.State.SUCCESS, contactResponseList, null);
@@ -63,8 +67,25 @@ public class MainActivityViewModel extends AndroidViewModel
     }
 
     @Override
-    public void initiateExport() {
+    public void initiateExport(List<ContactResponse> dataList) {
         Log.e(TAG, "initiateExport: ");
+        BooleanResponse response;
+
+        // Initially setting Status as 'LOADING' and set/post value to generateExcelMLD
+        response = new BooleanResponse(StateDefinition.State.LOADING, false, null);
+        setGenerateExcelMLD(response);
+
+        boolean isExcelGenerated = ExcelUtils.exportDataIntoWorkbook(getApplication(),
+                Constants.EXCEL_FILE_NAME, dataList);
+
+        if (isExcelGenerated) {
+            response = new BooleanResponse(StateDefinition.State.SUCCESS, true, null);
+        } else {
+            response = new BooleanResponse(StateDefinition.State.ERROR, false,
+                    new ErrorData(StateDefinition.ErrorState.EXCEL_GENERATION_ERROR, "Excel not generated"));
+        }
+
+        setGenerateExcelMLD(response);
     }
 
     @Override
@@ -85,6 +106,13 @@ public class MainActivityViewModel extends AndroidViewModel
     }
 
     /**
+     * Live Data for status of Excel Workbook Generation
+     */
+    public LiveData<BooleanResponse> isExcelGeneratedLiveData() {
+        return generateExcelMLD;
+    }
+
+    /**
      * Set/ Post Value for Contacts MLD
      */
     private void setContactsMLD(DataResponse<ContactResponse> response) {
@@ -94,6 +122,19 @@ public class MainActivityViewModel extends AndroidViewModel
         } else {
             // Post data in BG-Thread
             contactsMLD.postValue(response);
+        }
+    }
+
+    /**
+     * Set/ Post Value for Generate Excel MLD
+     */
+    private void setGenerateExcelMLD(BooleanResponse response) {
+        if (Thread.currentThread().equals(Looper.getMainLooper().getThread())) {
+            // Post data in Main-Thread
+            generateExcelMLD.setValue(response);
+        } else {
+            // Post data in BG-Thread
+            generateExcelMLD.postValue(response);
         }
     }
 
@@ -114,27 +155,29 @@ public class MainActivityViewModel extends AndroidViewModel
                 String id = contactCursor.getString(contactCursor.getColumnIndex(ContactsContract.Contacts._ID));
                 String name = contactCursor.getString(contactCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
 
-                // Check if current contact has phone numbers
-                if (contactCursor.getInt(contactCursor
-                        .getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
-                    // Query
-                    Cursor phoneNumberCursor = contentResolver
-                            .query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                                    null,
-                                    ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[]{id},
-                                    null);
+                if (name != null) {
+                    // Check if current contact has phone numbers
+                    if (contactCursor.getInt(contactCursor
+                            .getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
+                        phoneNumberList = new ArrayList<>();
 
-                    // Iterate
-                    phoneNumberList.clear();
+                        // Query
+                        Cursor phoneNumberCursor = contentResolver
+                                .query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                                        null,
+                                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[]{id},
+                                        null);
 
-                    while (phoneNumberCursor.moveToNext()) {
-                        String phoneNumber = phoneNumberCursor.getString(phoneNumberCursor
-                                .getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                        // Iterate
+                        while (phoneNumberCursor.moveToNext()) {
+                            String phoneNumber = phoneNumberCursor.getString(phoneNumberCursor
+                                    .getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
 
-                        phoneNumberList.add(new ContactResponse.PhoneNumber(phoneNumber));
+                            phoneNumberList.add(new ContactResponse.PhoneNumber(phoneNumber));
+                        }
+                        contactResponseList.add(new ContactResponse(id, name, phoneNumberList));
                     }
                 }
-                contactResponseList.add(new ContactResponse(id, name, phoneNumberList));
             }
         }
     }
