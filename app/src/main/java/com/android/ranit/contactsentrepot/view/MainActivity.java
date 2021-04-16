@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -14,6 +15,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Process;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -22,13 +26,20 @@ import android.widget.Button;
 import com.airbnb.lottie.LottieAnimationView;
 import com.android.ranit.contactsentrepot.R;
 import com.android.ranit.contactsentrepot.common.Constants;
+import com.android.ranit.contactsentrepot.data.ContactResponse;
+import com.android.ranit.contactsentrepot.data.response.DataResponse;
+import com.android.ranit.contactsentrepot.data.response.StateDefinition;
 import com.android.ranit.contactsentrepot.databinding.ActivityMainBinding;
-import com.android.ranit.contactsentrepot.repository.contract.IMainActivityContract;
+import com.android.ranit.contactsentrepot.contract.IMainActivityContract;
 import com.android.ranit.contactsentrepot.viewModel.MainActivityViewModel;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Created By: Ranit Raj Ganguly on 15/04/2021
@@ -38,6 +49,9 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
 
     private ActivityMainBinding mBinding;
     private MainActivityViewModel mViewModel;
+
+    private HandlerThread importContactsHandlerThread;
+    private Handler contactsHandler;
 
     private Button importContactsButton;
     private Button exportExcelButton;
@@ -57,13 +71,63 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
+    private List<ContactResponse> contactsList;
+
+    /**
+     * Observer for getContactsFromCPLiveData
+     */
+    private final Observer<DataResponse<ContactResponse>> importContactsFromCPObserver = contactResponse ->  {
+        Log.e(TAG, "importContactsFromCPObserver onChanged()");
+
+        if (contactResponse.getState() == StateDefinition.State.SUCCESS) {
+            setupLottieAnimation(NO_DATA_ANIMATION);
+
+            if (contactResponse.getData().size() > 0) {
+                contactsList.clear();
+                contactsList.addAll(contactResponse.getData());
+
+            } else {
+                displaySnackBar("No contacts found");
+                setupLottieAnimation(ERROR_ANIMATION);
+            }
+
+            Log.e(TAG, "SIZE contactsList: "+contactsList.size());
+
+        } else if (contactResponse.getState() == StateDefinition.State.ERROR) {
+            setupLottieAnimation(ERROR_ANIMATION);
+
+            String errorMessage = (contactResponse.getErrorData().getErrorStatus()
+                    + contactResponse.getErrorData().getErrorMessage());
+
+            displaySnackBar(errorMessage);
+        } else {
+            setupLottieAnimation(LOADING_ANIMATION);
+        }
+    };
+
+    /**
+     * Importing contacts Runnable to parse data in a Background HandlerThread
+     */
+    private final Runnable importContactsRunnable = new Runnable() {
+        @Override
+        public void run() {
+            Log.e(TAG, "jsonParserRunnable run: ");
+            mViewModel.initiateImport();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+
+        contactsList = new ArrayList<>();
+
         mViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
+        mViewModel.getContactsFromCPLiveData().observe(this, importContactsFromCPObserver);
 
         initializeViews();
+        setupHandlerThreads();
     }
 
     @Override
@@ -91,6 +155,10 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        importContactsHandlerThread.quitSafely();
+
+        mViewModel.getContactsFromCPLiveData().removeObservers(this);
     }
 
     @Override
@@ -120,6 +188,12 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     @Override
     public void setupHandlerThreads() {
         Log.e(TAG, "setupHandlerThreads: ");
+
+        // Import Contacts handler thread
+        importContactsHandlerThread = new HandlerThread("ImportContactsThread",
+                Process.THREAD_PRIORITY_BACKGROUND);
+        importContactsHandlerThread.start();
+        contactsHandler = new Handler(importContactsHandlerThread.getLooper());
     }
 
     @Override
@@ -130,8 +204,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     @Override
     public void onImportContactButtonClicked() {
         Log.e(TAG, "onImportContactButtonClicked: ");
-        displaySnackBar("Fetching Mobile contacts...");
-        mViewModel.initiateImport();
+        contactsHandler.post(importContactsRunnable);
     }
 
     @Override

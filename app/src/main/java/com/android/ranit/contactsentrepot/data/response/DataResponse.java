@@ -1,4 +1,6 @@
-package com.android.ranit.contactsentrepot.repository.response;
+package com.android.ranit.contactsentrepot.data.response;
+
+import java.util.List;
 
 /**
  * Created by: Ranit Raj Ganguly on 16/04/21.
@@ -7,12 +9,12 @@ public class DataResponse<T> {
     @StateDefinition.State
     private int state;
 
-    private T data;
+    private List<T> data;
 
     private ErrorData errorData;
 
     // Constructor
-    public DataResponse(@StateDefinition.State int state, T data, ErrorData errorData) {
+    public DataResponse(@StateDefinition.State int state, List<T> data, ErrorData errorData) {
         this.state = state;
         this.data = data;
         this.errorData = errorData;
@@ -27,11 +29,11 @@ public class DataResponse<T> {
         this.state = state;
     }
 
-    public T getData() {
+    public List<T> getData() {
         return data;
     }
 
-    public void setData(T data) {
+    public void setData(List<T> data) {
         this.data = data;
     }
 

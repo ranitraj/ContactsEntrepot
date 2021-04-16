@@ -1,4 +1,4 @@
-package com.android.ranit.contactsentrepot.repository.contract;
+package com.android.ranit.contactsentrepot.contract;
 
 /**
  * Contract to be implemented by MainActivity (View) and MainActivityViewModel (ViewModel)

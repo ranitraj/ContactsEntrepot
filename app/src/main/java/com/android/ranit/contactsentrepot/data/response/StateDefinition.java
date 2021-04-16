@@ -1,4 +1,4 @@
-package com.android.ranit.contactsentrepot.repository.response;
+package com.android.ranit.contactsentrepot.data.response;
 
 import androidx.annotation.IntDef;
 

@@ -1,4 +1,4 @@
-package com.android.ranit.contactsentrepot.repository.response;
+package com.android.ranit.contactsentrepot.data.response;
 
 /**
  * Created by: Ranit Raj Ganguly on 16/04/21.
