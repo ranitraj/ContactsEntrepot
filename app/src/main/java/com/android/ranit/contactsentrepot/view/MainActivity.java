@@ -85,13 +85,12 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
             if (contactResponse.getData().size() > 0) {
                 contactsList.clear();
                 contactsList.addAll(contactResponse.getData());
+                displaySnackBar("Retrieved "+contactsList.size()+" contacts from device.");
 
             } else {
                 displaySnackBar("No contacts found");
                 setupLottieAnimation(ERROR_ANIMATION);
             }
-
-            Log.e(TAG, "SIZE contactsList: "+contactsList.size());
 
         } else if (contactResponse.getState() == StateDefinition.State.ERROR) {
             setupLottieAnimation(ERROR_ANIMATION);
@@ -111,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     private final Runnable importContactsRunnable = new Runnable() {
         @Override
         public void run() {
-            Log.e(TAG, "jsonParserRunnable run: ");
+            Log.e(TAG, "importContactsRunnable run: ");
             mViewModel.initiateImport();
         }
     };
