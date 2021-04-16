@@ -7,7 +7,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.transition.Visibility;
 
 import android.Manifest;
 import android.content.DialogInterface;
@@ -96,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
 
     @Override
     public void initializeViews() {
+        Log.e(TAG, "initializeViews: ");
         importContactsButton = mBinding.importContactButton;
         exportExcelButton = mBinding.exportContactButton;
         readExcelButton = mBinding.readExcelDataButton;
@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
 
     @Override
     public void setupLottieAnimation(String animationName) {
+        Log.e(TAG, "setupLottieAnimation: ");
         if (animationView.isAnimating()) {
             animationView.cancelAnimation();
         }
@@ -118,34 +119,38 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
 
     @Override
     public void setupHandlerThreads() {
-
+        Log.e(TAG, "setupHandlerThreads: ");
     }
 
     @Override
     public void destroyHandlerThreads() {
-
+        Log.e(TAG, "destroyHandlerThreads: ");
     }
 
     @Override
     public void onImportContactButtonClicked() {
+        Log.e(TAG, "onImportContactButtonClicked: ");
         displaySnackBar("Fetching Mobile contacts...");
         mViewModel.initiateImport();
     }
 
     @Override
     public void onExportIntoExcelButtonClicked() {
+        Log.e(TAG, "onExportIntoExcelButtonClicked: ");
         displaySnackBar("Exporting data into Excel...");
         mViewModel.initiateExport();
     }
 
     @Override
     public void onReadFromExcelButtonClicked() {
+        Log.e(TAG, "onReadFromExcelButtonClicked: ");
         displaySnackBar("Reading data from excel...");
         mViewModel.initiateRead();
     }
 
     @Override
     public void onShareButtonClicked() {
+        Log.e(TAG, "onShareButtonClicked: ");
         mViewModel.initiateSharing();
     }
 
@@ -156,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
 
     @Override
     public void enableUIComponents() {
+        Log.e(TAG, "enableUIComponents: ");
         importContactsButton.setClickable(true);
         exportExcelButton.setClickable(true);
         readExcelButton.setClickable(true);
@@ -163,6 +169,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
 
     @Override
     public void disableUIComponents() {
+        Log.e(TAG, "disableUIComponents: ");
         importContactsButton.setClickable(false);
         exportExcelButton.setClickable(false);
         readExcelButton.setClickable(false);
@@ -170,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
 
     @Override
     public void setupRecyclerView() {
+        Log.e(TAG, "setupRecyclerView: ");
         switchVisibility(animationView, View.GONE);
     }
 
@@ -181,6 +189,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
 
     @Override
     public boolean checkPermissionsAtRuntime() {
+        Log.e(TAG, "checkPermissionsAtRuntime: ");
         for (String permission : PERMISSIONS) {
             if (ActivityCompat.checkSelfPermission(this, permission)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -192,6 +201,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
 
     @Override
     public void requestPermissions() {
+        Log.e(TAG, "requestPermissions: ");
         ActivityCompat.requestPermissions(this, PERMISSIONS, Constants.REQUEST_PERMISSION_ALL);
     }
 
