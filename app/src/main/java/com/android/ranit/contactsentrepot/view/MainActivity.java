@@ -54,6 +54,8 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     private Handler contactsHandler;
     private HandlerThread generateExcelHandlerThread;
     private Handler excelHandler;
+    private HandlerThread readExcelDataHandlerThread;
+    private Handler readExcelHandler;
 
     private Button importContactsButton;
     private Button exportExcelButton;
@@ -74,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     };
 
     private List<ContactResponse> contactsList;
+    private List<ContactResponse> importedExcelContactsList;
 
     /**
      * Observer for getContactsFromCPLiveData
@@ -127,6 +130,41 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     };
 
     /**
+     * Observer for readContactsFromExcelLiveData
+     */
+    private final Observer<DataResponse<ContactResponse>> readExcelDataObserver = dataResponse -> {
+        Log.e(TAG, "readExcelDataObserver onChanged()");
+
+        if (dataResponse.getState() == StateDefinition.State.SUCCESS) {
+
+            if (dataResponse.getData().size() > 0) {
+                switchVisibility(contactsRecyclerView, View.VISIBLE);
+
+                importedExcelContactsList.clear();
+                importedExcelContactsList.addAll(dataResponse.getData());
+                displaySnackBar("Fetched "+importedExcelContactsList.size()+" contacts from Excel.");
+
+                // TODO: Display data in Recycler View
+                setupRecyclerView();
+            } else {
+                displaySnackBar("No contacts found");
+                setupLottieAnimation(ERROR_ANIMATION);
+            }
+
+        } else if (dataResponse.getState() == StateDefinition.State.ERROR) {
+            setupLottieAnimation(ERROR_ANIMATION);
+
+            String errorMessage = (dataResponse.getErrorData().getErrorStatus()
+                    + dataResponse.getErrorData().getErrorMessage());
+
+            displaySnackBar(errorMessage);
+        } else {
+            setupLottieAnimation(LOADING_ANIMATION);
+        }
+    };
+
+
+    /**
      * Importing contacts Runnable to parse data in a Background HandlerThread
      */
     private final Runnable importContactsRunnable = new Runnable() {
@@ -148,16 +186,29 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
         }
     };
 
+    /**
+     * Read Excel data runnable
+     */
+    private final Runnable readExcelDataRunnable = new Runnable() {
+        @Override
+        public void run() {
+            Log.e(TAG, "readExcelDataRunnable run: ");
+            mViewModel.initiateRead();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         contactsList = new ArrayList<>();
+        importedExcelContactsList = new ArrayList<>();
 
         mViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
         mViewModel.getContactsFromCPLiveData().observe(this, importContactsFromCPObserver);
         mViewModel.isExcelGeneratedLiveData().observe(this, excelGenerationObserver);
+        mViewModel.readContactsFromExcelLiveData().observe(this, readExcelDataObserver);
 
         initializeViews();
         setupHandlerThreads();
@@ -233,6 +284,12 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
                 Process.THREAD_PRIORITY_BACKGROUND);
         generateExcelHandlerThread.start();
         excelHandler = new Handler(generateExcelHandlerThread.getLooper());
+
+        // Read Excel handler thread
+        readExcelDataHandlerThread = new HandlerThread("ReadExcelHandlerThread",
+                Process.THREAD_PRIORITY_BACKGROUND);
+        readExcelDataHandlerThread.start();
+        readExcelHandler = new Handler(readExcelDataHandlerThread.getLooper());
     }
 
     @Override
@@ -240,6 +297,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
         Log.e(TAG, "destroyHandlerThreads: ");
         importContactsHandlerThread.quitSafely();
         generateExcelHandlerThread.quitSafely();
+        readExcelDataHandlerThread.quitSafely();
     }
 
     @Override
@@ -257,8 +315,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     @Override
     public void onReadFromExcelButtonClicked() {
         Log.e(TAG, "onReadFromExcelButtonClicked: ");
-        displaySnackBar("Reading data from excel...");
-        mViewModel.initiateRead();
+        readExcelHandler.post(readExcelDataRunnable);
     }
 
     @Override

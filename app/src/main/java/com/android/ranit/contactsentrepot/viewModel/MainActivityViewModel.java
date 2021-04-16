@@ -28,20 +28,23 @@ public class MainActivityViewModel extends AndroidViewModel
         implements IMainActivityContract.ViewModel {
     private static final String TAG = MainActivityViewModel.class.getSimpleName();
 
-    private List<ContactResponse> contactResponseList;
-    private List<ContactResponse.PhoneNumber> phoneNumberList;
+    private final List<ContactResponse> contactResponseList;
+    private List<ContactResponse> parsedExcelDataList;
 
-    private MutableLiveData<DataResponse<ContactResponse>> contactsMLD;
-    private MutableLiveData<BooleanResponse> generateExcelMLD;
+    private final MutableLiveData<DataResponse<ContactResponse>> contactsMLD;
+    private final MutableLiveData<BooleanResponse> generateExcelMLD;
+    private final MutableLiveData<DataResponse<ContactResponse>> excelContactsDataMLD;
 
     // Constructor
     public MainActivityViewModel(@NonNull Application application) {
         super(application);
 
         contactResponseList = new ArrayList<>();
+        parsedExcelDataList = new ArrayList<>();
 
         contactsMLD = new MutableLiveData<>();
         generateExcelMLD = new MutableLiveData<>();
+        excelContactsDataMLD = new MutableLiveData<>();
     }
 
     @Override
@@ -57,7 +60,7 @@ public class MainActivityViewModel extends AndroidViewModel
 
         Log.e(TAG, "initiateImport SIZE: " + contactResponseList.size());
 
-        if (contactResponseList != null && contactResponseList.size() > 0) {
+        if (contactResponseList.size() > 0) {
             response = new DataResponse(StateDefinition.State.SUCCESS, contactResponseList, null);
         } else {
             response = new DataResponse(StateDefinition.State.ERROR, null,
@@ -91,6 +94,23 @@ public class MainActivityViewModel extends AndroidViewModel
     @Override
     public void initiateRead() {
         Log.e(TAG, "initiateRead: ");
+        DataResponse<ContactResponse> response;
+
+        // Initially setting Status as 'LOADING' and set/post value to excelContactsDataMLD
+        response = new DataResponse(StateDefinition.State.LOADING, null, null);
+        readExcelMLD(response);
+
+        parsedExcelDataList = ExcelUtils.readFromExcelWorkbook(getApplication(),
+                Constants.EXCEL_FILE_NAME);
+
+         if (parsedExcelDataList.size() > 0) {
+             response = new DataResponse(StateDefinition.State.SUCCESS, parsedExcelDataList, null);
+         } else {
+             response = new DataResponse(StateDefinition.State.ERROR, null,
+                     new ErrorData(StateDefinition.ErrorState.FILE_NOT_FOUND_ERROR, "Error reading data from excel"));
+         }
+
+        readExcelMLD(response);
     }
 
     @Override
@@ -110,6 +130,13 @@ public class MainActivityViewModel extends AndroidViewModel
      */
     public LiveData<BooleanResponse> isExcelGeneratedLiveData() {
         return generateExcelMLD;
+    }
+
+    /**
+     * Live Data for Reading Excel Workbook data
+     */
+    public LiveData<DataResponse<ContactResponse>> readContactsFromExcelLiveData() {
+        return excelContactsDataMLD;
     }
 
     /**
@@ -139,6 +166,19 @@ public class MainActivityViewModel extends AndroidViewModel
     }
 
     /**
+     * Set/ Post Value for Read Excel MLD
+     */
+    private void readExcelMLD(DataResponse<ContactResponse> response) {
+        if (Thread.currentThread().equals(Looper.getMainLooper().getThread())) {
+            // Post data in Main-Thread
+            excelContactsDataMLD.setValue(response);
+        } else {
+            // Post data in BG-Thread
+            excelContactsDataMLD.postValue(response);
+        }
+    }
+
+    /**
      * Method: Queries Contacts Content Provider to access contacts
      */
     private void queryContactsContentProvider() {
@@ -159,7 +199,7 @@ public class MainActivityViewModel extends AndroidViewModel
                     // Check if current contact has phone numbers
                     if (contactCursor.getInt(contactCursor
                             .getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
-                        phoneNumberList = new ArrayList<>();
+                        List<ContactResponse.PhoneNumber> phoneNumberList = new ArrayList<>();
 
                         // Query
                         Cursor phoneNumberCursor = contentResolver

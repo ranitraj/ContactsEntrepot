@@ -7,9 +7,14 @@ public class ContactResponse {
     private String name;
     private List<PhoneNumber> phoneNumberList;
 
-    // Constructor
+    // Constructors
     public ContactResponse(String id, String name, List<PhoneNumber> phoneNumbers) {
         this.id = id;
+        this.name = name;
+        this.phoneNumberList = phoneNumbers;
+    }
+
+    public ContactResponse(String name, List<PhoneNumber> phoneNumbers) {
         this.name = name;
         this.phoneNumberList = phoneNumbers;
     }
