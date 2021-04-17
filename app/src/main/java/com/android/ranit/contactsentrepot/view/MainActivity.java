@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -51,7 +50,6 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
 
     private ActivityMainBinding mBinding;
     private MainActivityViewModel mViewModel;
-    private ContactsAdapter mAdapter;
 
     private HandlerThread importContactsHandlerThread;
     private Handler contactsHandler;
@@ -88,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
         Log.e(TAG, "importContactsFromCPObserver onChanged()");
 
         if (contactResponse.getState() == StateDefinition.State.SUCCESS) {
-            setupLottieAnimation(NO_DATA_ANIMATION);
+            setupLottieAnimation(animationView, NO_DATA_ANIMATION);
 
             if (contactResponse.getData().size() > 0) {
                 contactsList.clear();
@@ -97,18 +95,18 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
 
             } else {
                 displaySnackBar("No contacts found");
-                setupLottieAnimation(ERROR_ANIMATION);
+                setupLottieAnimation(animationView, ERROR_ANIMATION);
             }
 
         } else if (contactResponse.getState() == StateDefinition.State.ERROR) {
-            setupLottieAnimation(ERROR_ANIMATION);
+            setupLottieAnimation(animationView, ERROR_ANIMATION);
 
             String errorMessage = (contactResponse.getErrorData().getErrorStatus()
                     + contactResponse.getErrorData().getErrorMessage());
 
             displaySnackBar(errorMessage);
         } else {
-            setupLottieAnimation(LOADING_ANIMATION);
+            setupLottieAnimation(animationView, LOADING_ANIMATION);
         }
     };
 
@@ -119,16 +117,16 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
         Log.e(TAG, "excelGenerationObserver onChanged()");
 
         if (booleanResponse.getState() == StateDefinition.State.SUCCESS) {
-            setupLottieAnimation(NO_DATA_ANIMATION);
+            setupLottieAnimation(animationView, NO_DATA_ANIMATION);
             displaySnackBar(Constants.EXCEL_FILE_NAME+" generated Successfully");
         } else if (booleanResponse.getState() == StateDefinition.State.ERROR) {
-            setupLottieAnimation(ERROR_ANIMATION);
+            setupLottieAnimation(animationView, ERROR_ANIMATION);
 
             String errorMessage = (booleanResponse.getErrorData().getErrorStatus()
                     + booleanResponse.getErrorData().getErrorMessage());
             displaySnackBar(errorMessage);
         } else {
-            setupLottieAnimation(LOADING_ANIMATION);
+            setupLottieAnimation(animationView, LOADING_ANIMATION);
         }
     };
 
@@ -148,18 +146,18 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
                 setupRecyclerView();
             } else {
                 displaySnackBar("No contacts found");
-                setupLottieAnimation(ERROR_ANIMATION);
+                setupLottieAnimation(animationView, ERROR_ANIMATION);
             }
 
         } else if (dataResponse.getState() == StateDefinition.State.ERROR) {
-            setupLottieAnimation(ERROR_ANIMATION);
+            setupLottieAnimation(animationView, ERROR_ANIMATION);
 
             String errorMessage = (dataResponse.getErrorData().getErrorStatus()
                     + dataResponse.getErrorData().getErrorMessage());
 
             displaySnackBar(errorMessage);
         } else {
-            setupLottieAnimation(LOADING_ANIMATION);
+            setupLottieAnimation(animationView, LOADING_ANIMATION);
         }
     };
 
@@ -257,16 +255,16 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
         contactsRecyclerView = mBinding.displayContactsRecyclerView;
         constraintLayout = mBinding.constraintLayout;
 
-        setupLottieAnimation(NO_DATA_ANIMATION);
+        setupLottieAnimation(animationView, NO_DATA_ANIMATION);
     }
 
     @Override
-    public void setupLottieAnimation(String animationName) {
-        if (animationView.isAnimating()) {
-            animationView.cancelAnimation();
+    public void setupLottieAnimation(LottieAnimationView lottieView, String animationName) {
+        if (lottieView.isAnimating()) {
+            lottieView.cancelAnimation();
         }
-        animationView.setAnimation(animationName);
-        animationView.playAnimation();
+        lottieView.setAnimation(animationName);
+        lottieView.playAnimation();
     }
 
     @Override
@@ -352,7 +350,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
         switchVisibility(animationView, View.GONE);
         switchVisibility(contactsRecyclerView, View.VISIBLE);
 
-        mAdapter = new ContactsAdapter(importedExcelContactsList);
+        ContactsAdapter mAdapter = new ContactsAdapter(importedExcelContactsList);
         contactsRecyclerView.setHasFixedSize(true);
         contactsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         contactsRecyclerView.setAdapter(mAdapter);
@@ -422,12 +420,9 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
             new MaterialAlertDialogBuilder(this)
                     .setTitle("Permissions Mandatory")
                     .setMessage("Kindly enable all permissions through Settings")
-                    .setPositiveButton("OKAY", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            launchAppSettings();
-                            dialogInterface.dismiss();
-                        }
+                    .setPositiveButton("OKAY", (dialogInterface, i) -> {
+                        launchAppSettings();
+                        dialogInterface.dismiss();
                     })
                     .setCancelable(false)
                     .show();

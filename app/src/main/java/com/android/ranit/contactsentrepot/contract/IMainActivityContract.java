@@ -1,5 +1,6 @@
 package com.android.ranit.contactsentrepot.contract;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.android.ranit.contactsentrepot.data.ContactResponse;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public interface IMainActivityContract {
     // View
     interface View {
         void initializeViews();
-        void setupLottieAnimation(String animationName);
+        void setupLottieAnimation(LottieAnimationView animationView, String animationName);
         void setupHandlerThreads();
         void destroyHandlerThreads();
         void onImportContactButtonClicked();
