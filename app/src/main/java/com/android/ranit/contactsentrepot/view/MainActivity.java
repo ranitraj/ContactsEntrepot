@@ -215,6 +215,12 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     @Override
     protected void onStart() {
         super.onStart();
+        requestPermissions();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
 
         boolean isPermissionGranted = checkPermissionsAtRuntime();
 
@@ -222,8 +228,6 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
             importContactsButton.setOnClickListener(view -> onImportContactButtonClicked());
             exportExcelButton.setOnClickListener(view -> onExportIntoExcelButtonClicked());
             readExcelButton.setOnClickListener(view -> onReadFromExcelButtonClicked());
-        } else {
-            requestPermissions();
         }
 
         shareButton.setOnClickListener(view -> onShareButtonClicked());
@@ -331,16 +335,26 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     public void enableUIComponents() {
         Log.e(TAG, "enableUIComponents: ");
         importContactsButton.setClickable(true);
+        importContactsButton.setAlpha(1);
+
         exportExcelButton.setClickable(true);
+        exportExcelButton.setAlpha(1);
+
         readExcelButton.setClickable(true);
+        readExcelButton.setAlpha(1);
     }
 
     @Override
     public void disableUIComponents() {
         Log.e(TAG, "disableUIComponents: ");
         importContactsButton.setClickable(false);
+        importContactsButton.setAlpha((float) 0.4);
+
         exportExcelButton.setClickable(false);
+        exportExcelButton.setAlpha((float) 0.4);
+
         readExcelButton.setClickable(false);
+        readExcelButton.setAlpha((float) 0.4);
     }
 
     @Override
@@ -385,6 +399,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         boolean isAlertDialogInflated = false;
+        boolean isUIDisabled = false;
 
         if (requestCode == Constants.REQUEST_PERMISSION_ALL) {
             for (int i = 0; i < permissions.length; i++) {
@@ -398,11 +413,15 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
                     } else {
                         // Called when user selects 'DENY'
                         displaySnackBar("Enable all permissions");
+                        isUIDisabled = true;
                         disableUIComponents();
                     }
                 } else if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
                     // Called when user selects 'ALLOW'
-                    enableUIComponents();
+                    if (!isUIDisabled) {
+                        enableUIComponents();
+                    }
+
                 }
             }
 

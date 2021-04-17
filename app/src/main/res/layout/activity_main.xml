@@ -26,6 +26,21 @@
             app:icon="@drawable/ic_import_contact"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"/>
 
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/import_contact_lottie"
+            android:layout_width="@dimen/dp_0"
+            android:layout_height="@dimen/dp_0"
+            app:layout_constraintHeight_percent="0.05"
+            app:layout_constraintWidth_percent="0.1"
+
+            app:lottie_loop="false"
+            app:lottie_autoPlay="false"
+
+            app:layout_constraintStart_toEndOf="@id/import_contact_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/export_contact_lottie" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/export_contact_button"
             android:layout_width="wrap_content"
@@ -43,6 +58,21 @@
             app:icon="@drawable/ic_article"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"/>
 
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/export_contact_lottie"
+            android:layout_width="@dimen/dp_0"
+            android:layout_height="@dimen/dp_0"
+            app:layout_constraintHeight_percent="0.05"
+            app:layout_constraintWidth_percent="0.1"
+
+            app:lottie_loop="false"
+            app:lottie_autoPlay="false"
+
+            app:layout_constraintStart_toEndOf="@id/export_contact_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/import_contact_lottie"
+            app:layout_constraintBottom_toTopOf="@id/read_contact_lottie"/>
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/read_excel_data_button"
             android:layout_width="wrap_content"
@@ -59,6 +89,21 @@
             app:layout_constraintBottom_toTopOf="@id/display_contacts_recycler_view"
             app:icon="@drawable/ic_read"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"/>
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/read_contact_lottie"
+            android:layout_width="@dimen/dp_0"
+            android:layout_height="@dimen/dp_0"
+            app:layout_constraintHeight_percent="0.05"
+            app:layout_constraintWidth_percent="0.1"
+
+            app:lottie_loop="false"
+            app:lottie_autoPlay="false"
+
+            app:layout_constraintStart_toEndOf="@id/read_excel_data_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/export_contact_lottie"
+            app:layout_constraintBottom_toTopOf="@id/display_contacts_recycler_view" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/display_contacts_recycler_view"
