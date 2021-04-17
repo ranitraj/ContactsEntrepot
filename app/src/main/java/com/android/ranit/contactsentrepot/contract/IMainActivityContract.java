@@ -1,7 +1,6 @@
 package com.android.ranit.contactsentrepot.contract;
 
 import android.net.Uri;
-import android.view.View;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.android.ranit.contactsentrepot.data.ContactResponse;
