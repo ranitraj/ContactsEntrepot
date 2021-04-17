@@ -64,7 +64,7 @@
             android:id="@+id/display_contacts_recycler_view"
             android:layout_width="@dimen/dp_0"
             android:layout_height="@dimen/dp_0"
-            app:layout_constraintHeight_percent="0.6"
+            app:layout_constraintHeight_percent="0.55"
 
             android:visibility="invisible"
 

@@ -7,6 +7,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
@@ -32,6 +33,7 @@ import com.android.ranit.contactsentrepot.data.response.DataResponse;
 import com.android.ranit.contactsentrepot.data.response.StateDefinition;
 import com.android.ranit.contactsentrepot.databinding.ActivityMainBinding;
 import com.android.ranit.contactsentrepot.contract.IMainActivityContract;
+import com.android.ranit.contactsentrepot.view.adapter.ContactsAdapter;
 import com.android.ranit.contactsentrepot.viewModel.MainActivityViewModel;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -49,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
 
     private ActivityMainBinding mBinding;
     private MainActivityViewModel mViewModel;
+    private ContactsAdapter mAdapter;
 
     private HandlerThread importContactsHandlerThread;
     private Handler contactsHandler;
@@ -138,13 +141,10 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
         if (dataResponse.getState() == StateDefinition.State.SUCCESS) {
 
             if (dataResponse.getData().size() > 0) {
-                switchVisibility(contactsRecyclerView, View.VISIBLE);
-
                 importedExcelContactsList.clear();
                 importedExcelContactsList.addAll(dataResponse.getData());
                 displaySnackBar("Fetched "+importedExcelContactsList.size()+" contacts from Excel.");
 
-                // TODO: Display data in Recycler View
                 setupRecyclerView();
             } else {
                 displaySnackBar("No contacts found");
@@ -348,7 +348,14 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     @Override
     public void setupRecyclerView() {
         Log.e(TAG, "setupRecyclerView: ");
+
         switchVisibility(animationView, View.GONE);
+        switchVisibility(contactsRecyclerView, View.VISIBLE);
+
+        mAdapter = new ContactsAdapter(importedExcelContactsList);
+        contactsRecyclerView.setHasFixedSize(true);
+        contactsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        contactsRecyclerView.setAdapter(mAdapter);
     }
 
     @Override
