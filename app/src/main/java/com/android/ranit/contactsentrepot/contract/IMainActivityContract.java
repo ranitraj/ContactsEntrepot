@@ -1,5 +1,7 @@
 package com.android.ranit.contactsentrepot.contract;
 
+import android.view.View;
+
 import com.airbnb.lottie.LottieAnimationView;
 import com.android.ranit.contactsentrepot.data.ContactResponse;
 
@@ -23,8 +25,8 @@ public interface IMainActivityContract {
         void onReadFromExcelButtonClicked();
         void onShareButtonClicked();
         void switchVisibility(android.view.View view, int visibility);
-        void enableUIComponents();
-        void disableUIComponents();
+        void enableUIComponent(android.view.View componentName);
+        void disableUIComponent(android.view.View componentName);
         void setupRecyclerView();
         void displaySnackBar(String message);
         boolean checkPermissionsAtRuntime();

@@ -62,13 +62,18 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     private Button exportExcelButton;
     private Button readExcelButton;
     private FloatingActionButton shareButton;
-    private LottieAnimationView animationView;
     private RecyclerView contactsRecyclerView;
     private ConstraintLayout constraintLayout;
+    private LottieAnimationView lottieAnimationView;
+    private LottieAnimationView importLottieView;
+    private LottieAnimationView exportLottieView;
+    private LottieAnimationView readLottieView;
 
     private final String NO_DATA_ANIMATION = "no_data.json";
     private final String LOADING_ANIMATION = "loading.json";
     private final String ERROR_ANIMATION = "error.json";
+    private final String DONE_ANIMATION = "done.json";
+    private final String CANCEL_ANIMATION = "cancel.json";
 
     private final String[] PERMISSIONS = {
             Manifest.permission.READ_CONTACTS,
@@ -86,27 +91,36 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
         Log.e(TAG, "importContactsFromCPObserver onChanged()");
 
         if (contactResponse.getState() == StateDefinition.State.SUCCESS) {
-            setupLottieAnimation(animationView, NO_DATA_ANIMATION);
+            setupLottieAnimation(lottieAnimationView, NO_DATA_ANIMATION);
 
             if (contactResponse.getData().size() > 0) {
                 contactsList.clear();
                 contactsList.addAll(contactResponse.getData());
                 displaySnackBar("Retrieved "+contactsList.size()+" contacts from device.");
 
+                // Disable Import button
+                disableUIComponent(importContactsButton);
+                setupLottieAnimation(importLottieView, DONE_ANIMATION);
+
+                // Enable Export button and set onClickListener
+                enableUIComponent(exportExcelButton);
+                exportExcelButton.setOnClickListener(view -> onExportIntoExcelButtonClicked());
+
             } else {
                 displaySnackBar("No contacts found");
-                setupLottieAnimation(animationView, ERROR_ANIMATION);
+                setupLottieAnimation(lottieAnimationView, ERROR_ANIMATION);
             }
 
         } else if (contactResponse.getState() == StateDefinition.State.ERROR) {
-            setupLottieAnimation(animationView, ERROR_ANIMATION);
+            setupLottieAnimation(lottieAnimationView, ERROR_ANIMATION);
 
             String errorMessage = (contactResponse.getErrorData().getErrorStatus()
                     + contactResponse.getErrorData().getErrorMessage());
 
+            setupLottieAnimation(importLottieView, CANCEL_ANIMATION);
             displaySnackBar(errorMessage);
         } else {
-            setupLottieAnimation(animationView, LOADING_ANIMATION);
+            setupLottieAnimation(lottieAnimationView, LOADING_ANIMATION);
         }
     };
 
@@ -117,16 +131,27 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
         Log.e(TAG, "excelGenerationObserver onChanged()");
 
         if (booleanResponse.getState() == StateDefinition.State.SUCCESS) {
-            setupLottieAnimation(animationView, NO_DATA_ANIMATION);
+            setupLottieAnimation(lottieAnimationView, NO_DATA_ANIMATION);
             displaySnackBar(Constants.EXCEL_FILE_NAME+" generated Successfully");
+
+            // Disable Export button
+            disableUIComponent(exportExcelButton);
+            setupLottieAnimation(exportLottieView, DONE_ANIMATION);
+
+            // Enable Read button and set onClickListener
+            enableUIComponent(readExcelButton);
+            readExcelButton.setOnClickListener(view -> onReadFromExcelButtonClicked());
+
         } else if (booleanResponse.getState() == StateDefinition.State.ERROR) {
-            setupLottieAnimation(animationView, ERROR_ANIMATION);
+            setupLottieAnimation(lottieAnimationView, ERROR_ANIMATION);
 
             String errorMessage = (booleanResponse.getErrorData().getErrorStatus()
                     + booleanResponse.getErrorData().getErrorMessage());
+
+            setupLottieAnimation(exportLottieView, CANCEL_ANIMATION);
             displaySnackBar(errorMessage);
         } else {
-            setupLottieAnimation(animationView, LOADING_ANIMATION);
+            setupLottieAnimation(lottieAnimationView, LOADING_ANIMATION);
         }
     };
 
@@ -143,21 +168,26 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
                 importedExcelContactsList.addAll(dataResponse.getData());
                 displaySnackBar("Fetched "+importedExcelContactsList.size()+" contacts from Excel.");
 
+                // Disable Read button
+                disableUIComponent(readExcelButton);
+                setupLottieAnimation(readLottieView, DONE_ANIMATION);
+
                 setupRecyclerView();
             } else {
                 displaySnackBar("No contacts found");
-                setupLottieAnimation(animationView, ERROR_ANIMATION);
+                setupLottieAnimation(lottieAnimationView, ERROR_ANIMATION);
             }
 
         } else if (dataResponse.getState() == StateDefinition.State.ERROR) {
-            setupLottieAnimation(animationView, ERROR_ANIMATION);
+            setupLottieAnimation(lottieAnimationView, ERROR_ANIMATION);
 
             String errorMessage = (dataResponse.getErrorData().getErrorStatus()
                     + dataResponse.getErrorData().getErrorMessage());
 
+            setupLottieAnimation(readLottieView, CANCEL_ANIMATION);
             displaySnackBar(errorMessage);
         } else {
-            setupLottieAnimation(animationView, LOADING_ANIMATION);
+            setupLottieAnimation(lottieAnimationView, LOADING_ANIMATION);
         }
     };
 
@@ -226,8 +256,6 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
 
         if (isPermissionGranted) {
             importContactsButton.setOnClickListener(view -> onImportContactButtonClicked());
-            exportExcelButton.setOnClickListener(view -> onExportIntoExcelButtonClicked());
-            readExcelButton.setOnClickListener(view -> onReadFromExcelButtonClicked());
         }
 
         shareButton.setOnClickListener(view -> onShareButtonClicked());
@@ -255,11 +283,17 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
         exportExcelButton = mBinding.exportContactButton;
         readExcelButton = mBinding.readExcelDataButton;
         shareButton = mBinding.shareExcelFloatingButton;
-        animationView = mBinding.lottieAnimationView;
         contactsRecyclerView = mBinding.displayContactsRecyclerView;
         constraintLayout = mBinding.constraintLayout;
+        lottieAnimationView = mBinding.lottieAnimationView;
+        importLottieView = mBinding.importContactLottie;
+        exportLottieView = mBinding.exportContactLottie;
+        readLottieView = mBinding.readContactLottie;
 
-        setupLottieAnimation(animationView, NO_DATA_ANIMATION);
+        disableUIComponent(exportExcelButton);
+        disableUIComponent(readExcelButton);
+
+        setupLottieAnimation(lottieAnimationView, NO_DATA_ANIMATION);
     }
 
     @Override
@@ -332,36 +366,22 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     }
 
     @Override
-    public void enableUIComponents() {
-        Log.e(TAG, "enableUIComponents: ");
-        importContactsButton.setClickable(true);
-        importContactsButton.setAlpha(1);
-
-        exportExcelButton.setClickable(true);
-        exportExcelButton.setAlpha(1);
-
-        readExcelButton.setClickable(true);
-        readExcelButton.setAlpha(1);
+    public void enableUIComponent(View componentName) {
+        componentName.setClickable(true);
+        componentName.setAlpha(1);
     }
 
     @Override
-    public void disableUIComponents() {
-        Log.e(TAG, "disableUIComponents: ");
-        importContactsButton.setClickable(false);
-        importContactsButton.setAlpha((float) 0.4);
-
-        exportExcelButton.setClickable(false);
-        exportExcelButton.setAlpha((float) 0.4);
-
-        readExcelButton.setClickable(false);
-        readExcelButton.setAlpha((float) 0.4);
+    public void disableUIComponent(View componentName) {
+        componentName.setClickable(false);
+        componentName.setAlpha((float) 0.4);
     }
 
     @Override
     public void setupRecyclerView() {
         Log.e(TAG, "setupRecyclerView: ");
 
-        switchVisibility(animationView, View.GONE);
+        switchVisibility(lottieAnimationView, View.GONE);
         switchVisibility(contactsRecyclerView, View.VISIBLE);
 
         ContactsAdapter mAdapter = new ContactsAdapter(importedExcelContactsList);
@@ -414,12 +434,15 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
                         // Called when user selects 'DENY'
                         displaySnackBar("Enable all permissions");
                         isUIDisabled = true;
-                        disableUIComponents();
+
+                        disableUIComponent(importContactsButton);
+                        disableUIComponent(exportExcelButton);
+                        disableUIComponent(readExcelButton);
                     }
                 } else if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
                     // Called when user selects 'ALLOW'
                     if (!isUIDisabled) {
-                        enableUIComponents();
+                        enableUIComponent(importContactsButton);
                     }
 
                 }
