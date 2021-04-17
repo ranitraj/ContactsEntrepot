@@ -1,5 +1,6 @@
 package com.android.ranit.contactsentrepot.contract;
 
+import android.net.Uri;
 import android.view.View;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -38,6 +39,6 @@ public interface IMainActivityContract {
         void initiateImport();
         void initiateExport(List<ContactResponse> dataList);
         void initiateRead();
-        void initiateSharing();
+        Uri initiateSharing();
     }
 }

@@ -3,6 +3,7 @@ package com.android.ranit.contactsentrepot.viewModel;
 import android.app.Application;
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Looper;
 import android.provider.ContactsContract;
 import android.util.Log;
@@ -14,6 +15,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.android.ranit.contactsentrepot.common.Constants;
 import com.android.ranit.contactsentrepot.common.ExcelUtils;
+import com.android.ranit.contactsentrepot.common.FileShareUtils;
 import com.android.ranit.contactsentrepot.contract.IMainActivityContract;
 import com.android.ranit.contactsentrepot.data.ContactResponse;
 import com.android.ranit.contactsentrepot.data.response.BooleanResponse;
@@ -114,8 +116,9 @@ public class MainActivityViewModel extends AndroidViewModel
     }
 
     @Override
-    public void initiateSharing() {
-
+    public Uri initiateSharing() {
+        Log.e(TAG, "initiateSharing: ");
+        return FileShareUtils.accessFile(getApplication(), Constants.EXCEL_FILE_NAME);
     }
 
     /**

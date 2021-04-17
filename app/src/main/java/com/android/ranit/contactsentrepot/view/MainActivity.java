@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.ShareCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -357,7 +359,13 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
     @Override
     public void onShareButtonClicked() {
         Log.e(TAG, "onShareButtonClicked: ");
-        mViewModel.initiateSharing();
+        Uri fileUri = mViewModel.initiateSharing();
+
+        if (fileUri == null) {
+            displaySnackBar("Generate Excel before sharing");
+        } else {
+            launchShareFileIntent(fileUri);
+        }
     }
 
     @Override
@@ -479,5 +487,19 @@ public class MainActivity extends AppCompatActivity implements IMainActivityCont
         Uri uri = Uri.fromParts("package", getPackageName(), null);
         intent.setData(uri);
         startActivityForResult(intent, Constants.REQUEST_PERMISSION_SETTING);
+    }
+
+    /**
+     * Method: Launch Share file screen
+     */
+    private void launchShareFileIntent(Uri uri) {
+        Intent intent = ShareCompat.IntentBuilder.from(this)
+                .setType("application/pdf")
+                .setStream(uri)
+                .setChooserTitle("Select application to share file")
+                .createChooserIntent()
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        startActivity(intent);
     }
 }
